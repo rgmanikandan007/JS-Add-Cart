@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .checkbox {
+            margin-top: 1rem;
+        }
+
+        .cart {
+            margin-top: 1rem;
+        }
+
+        .product {
+            border: 2px solid rgb(0, 0, 0);
+            display: inline-block;
+            text-align: center;
+            margin: 20px;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Product Page</h1>
+
+        <input type="text" placeholder="Search product" id="searchbar" onkeyup="filterProduct()">
+
+        <div class="checkbox">
+            <label><input type="checkbox" id="filterFruit" onchange="filterProduct()">Fruits</label>
+            <label><input type="checkbox" id="filterVegetable" onchange="filterProduct()">Vegetables</label>
+        </div>
+
+        <div class="cart">
+            🛒 <span id="cartcount">0</span>
+        </div>
+
+        <div id="productContainer"></div>
+    </div>
+
+
+    <script>
+        let cart = [];
+        let cartcount = 0;
+
+        const products = [
+            { name: "Apple", price: 350, des: "Fruit", category: 'Fruit', image: '/' },
+            { name: "Mango", price: 200, des: "Fruit", category: 'Fruit', image: '/' },
+            { name: "Banana", price: 100, des: "Fruit", category: 'Fruit', image: '/' },
+            { name: "Orange", price: 150, des: "Fruit", category: 'Fruit', image: '/' },
+            { name: "Kiwi", price: 180, des: "Fruit", category: 'Fruit', image: '/' },
+            { name: "Carrot", price: 300, des: "Vegetable", category: 'Vegetable', image: '/' },
+            { name: "Tomato", price: 130, des: "Vegetable", category: 'Vegetable', image: '/' }
+        ]
+        console.log(products)
+
+        function displayProduct(productlist) {
+            const container = document.getElementById("productContainer");
+            productlist.forEach((product, index) => {
+                const productDiv = document.createElement("div");
+                productDiv.className = "product";
+                productDiv.innerHTML = `
+                    <img src="${product.image}">
+                    <h1>${product.name}</h1>
+                    <p>Price : ${product.price}</p>
+                    <p>${product.des}</p>
+                    <button onclick="Addcart(${index})">Add Cart</button>
+                `
+                container.append(productDiv);
+            })
+        }
+
+
+        function filterProduct() {
+            const searchBar = document.getElementById("searchbar");
+            const filterFruit = document.getElementById("filterFruit");
+            const filterVegetable = document.getElementById("filterVegetable");
+
+            const filterProducts = products.filter(product => {
+                const matchSearch = product.name.toLocaleLowerCase().includes(searchBar);
+                //console.log(matchSearch)
+                const matchesCategory = (!filterFruit && !filterVegetable) ||
+                    (filterFruit && product.category === "Fruit") ||
+                    (filterVegetable && product.category === "Vegetable")
+                return matchSearch && matchesCategory;
+                //console.log(matchesCategory)
+            })
+            displayProduct(filterProducts);
+        }
+
+        displayProduct(products)
+
+
+
+    </script>
+</body>
+
+</html>
