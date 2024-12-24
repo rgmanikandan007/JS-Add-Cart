@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Page</title>
+    <style>
+        #productContainer {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .product {
+            border: 2px solid purple;
+            display: inline-block;
+            text-align: center;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .product img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+
+        .cart {
+            font-size: 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        #checkoutPage {
+            display: none;
+            padding: 20px;
+        }
+
+        .checkout-product {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid purple;
+            margin: 10px 0;
+            padding: 10px;
+        }
+
+        .checkout-product img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>PRODUCT PAGE</h1>
+
+    <input type="text" placeholder="Search product" id="searchbar" onkeyup="filterProducts()">
+    <div>
+        <label><input type="checkbox" id="filterFruit" onchange="filterProducts()"> Fruits</label>
+        <label><input type="checkbox" id="filterVegetable" onchange="filterProducts()"> Vegetables</label>
+    </div>
+    <div class="cart" onclick="openCheckoutPage()">
+        🛒 <span id="cartcount">0</span>
+    </div>
+
+    <div id="productContainer"></div>
+
+
+    <div id="checkoutPage">
+        <h2>Checkout</h2>
+        <div id="checkoutContainer"></div>
+        <h3>Total: $<span id="totalPrice">0</span></h3>
+        <button onclick="checkout()">Complete Checkout</button>
+        <button onclick="closeCheckoutPage()">Back to Product Page</button>
+    </div>
+
+    <script>
+        let cart = [];
+        let cartcount = 0;
+
+        //product page array of object
+        const products = [
+            { name: 'Apple', price: 350, des: "Fruit", category: 'fruit', image: 'images/apple.jfif' },
+            { name: 'Mango', price: 200, des: "Fruit", category: 'fruit', image: 'images/mango.jfif' },
+            { name: 'Banana', price: 100, des: "Fruit", category: 'fruit', image: 'images/banana.jfif' },
+            { name: 'Orange', price: 250, des: "Fruit", category: 'fruit', image: 'images/orange.jfif' },
+            { name: 'Kiwi', price: 400, des: "Fruit", category: 'fruit', image: 'images/kiwi.jfif' },
+            { name: 'Carrot', price: 150, des: "Vegetable", category: 'vegetable', image: 'images/carrot.jfif' },
+            { name: 'Broccoli', price: 200, des: "Vegetable", category: 'vegetable', image: 'images/broccoli.jfif' }
+        ];
+
+        //display products dynamically
+        function displayproducts(productlist) {
+            const container = document.getElementById('productContainer');
+            container.innerHTML = "";
+            productlist.forEach((product, index) => {
+                const productdiv = document.createElement('div');
+                productdiv.className = 'product';
+                productdiv.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <h1>${product.name}</h1>  
+                    <p>Price: $${product.price}</p>
+                    <p>Description: ${product.des}</p>
+                    <button onclick="addtocart(${index})">Add to Cart</button>
+                `;
+                container.appendChild(productdiv);
+            });
+        }
+
+        //product filter
+        function filterProducts() { 
+            const search = document.getElementById('searchbar').value.toLowerCase();
+            const showFruits = document.getElementById('filterFruit').checked;
+            const showVegetables = document.getElementById('filterVegetable').checked;
+
+            const filteredProducts = products.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(search);
+                const matchesCategory =
+                    (!showFruits && !showVegetables) || (showFruits && product.category === 'fruit') ||
+                    (showVegetables && product.category === 'vegetable');
+                return matchesSearch && matchesCategory;
+            });
+
+            displayproducts(filteredProducts);
+        }
+
+        //add to cart functionality
+        function addtocart(index) {
+            const product = products[index];
+            const existingProduct = cart.find(item => item.name === product.name);
+
+            if (existingProduct) {
+                existingProduct.quantity++;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            cartcount++;
+            document.getElementById('cartcount').innerText = cartcount;
+            alert(`${product.name} added to cart`);
+        }
+
+        //product checkout
+        function openCheckoutPage() {
+            document.getElementById('productContainer').style.display = 'none';  
+            document.getElementById('checkoutPage').style.display = 'block';
+            displayCheckout();
+        }
+
+        function closeCheckoutPage() {
+            document.getElementById('checkoutPage').style.display = 'none';
+            document.getElementById('productContainer').style.display = 'flex';
+        }
+
+        function displayCheckout() {
+            const container = document.getElementById('checkoutContainer');
+            const totalPriceEl = document.getElementById('totalPrice');
+            container.innerHTML = "";
+
+            let total = 0;
+
+            cart.forEach((product, index) => {
+                total += product.price * product.quantity;
+                const productDiv = document.createElement('div');
+                productDiv.className = 'checkout-product';
+                productDiv.innerHTML = `
+                    <img src="${product.image}" alt="Item ${index + 1}">
+                    <span>${product.name} ($${product.price})</span>
+                    <span>
+                        <button onclick="decrementItem(${index})">-</button>
+                        <span>${product.quantity}</span>
+                        <button onclick="incrementItem(${index})">+</button>
+                    </span>
+                    <span>$${product.price * product.quantity}</span>
+                    <button onclick="removeFromCart(${index})">Remove</button>
+                `;
+                container.appendChild(productDiv);
+            });
+
+            totalPriceEl.innerText = total;
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+            alert("Checkout successful!");
+            cart = [];
+            cartcount = 0;
+            document.getElementById('cartcount').innerText = cartcount;
+            closeCheckoutPage();
+        }
+
+        function incrementItem(index) {
+            cart[index].quantity++;
+            cartcount++;
+            document.getElementById('cartcount').innerText = cartcount;
+            displayCheckout();
+        }
+
+        function decrementItem(index) {
+            if (cart[index].quantity > 1) {
+                cart[index].quantity--;
+                cartcount--;
+            } else {
+
+                removeFromCart(index);
+                return;
+            }
+            document.getElementById('cartcount').innerText = cartcount;
+            displayCheckout();
+        }
+
+        function removeFromCart(index) {
+            cartcount -= cart[index].quantity;
+            cart.splice(index, 1);
+            document.getElementById('cartcount').innerText = cartcount;
+            displayCheckout();
+        }
+
+
+        displayproducts(products);
+    </script>
+</body>
+
+</html>

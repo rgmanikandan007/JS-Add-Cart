@@ -68,7 +68,7 @@
                     <h1>${product.name}</h1>
                     <p>Price : ${product.price}</p>
                     <p>${product.des}</p>
-                    <button onclick="Addcart(${index})">Add Cart</button>
+                    <button onclick="addtocart(${index})">Add Cart</button>
                 `
                 container.append(productDiv);
             })
@@ -92,8 +92,22 @@
             displayProduct(filterProducts);
         }
 
-        displayProduct(products)
+        function addtocart(index){
+            const product = products[index]
+            const existingProduct = cart.find(item => item.name === product.name)
 
+            if(existingProduct){
+                existingProduct.quantity++
+            } else {
+                cart.push({...product, quantity: 1})
+            }
+
+            cartcount++;
+            document.getElementById("cartcount").innerText = cartcount;
+            alert(`${product.name} add to cart`);
+        }
+
+       // displayProduct(products)
 
 
     </script>
